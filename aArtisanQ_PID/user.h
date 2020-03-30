@@ -138,7 +138,7 @@
 // or other roasters where BT might be jumpy, then a higher value of RISE_FILTER
 // will be needed.  Theoretical max. is 99%, but watch out for the lag when
 // you get above 95%.
-#define RISE_FILTER 85 // heavy filtering on non-displayed BT for RoR calculations
+#define RISE_FILTER 80 // heavy filtering on non-displayed BT for RoR calculations
 #define ROR_FILTER 80 // post-filtering for the computed RoR values
 
 // Thermocouple inputs
