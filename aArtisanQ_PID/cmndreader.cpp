@@ -684,6 +684,7 @@ boolean resetCmnd::doCommand( CmndParser* pars ) {
   if( strcmp( keyword, pars->cmndName() ) == 0 ) {
     //pBourbon = true;
     counter = 0;
+    SV = 0;
     Serial.println( F("# Reset" )); // respond to pBourbon reset command
     return true;
   }
@@ -806,4 +807,3 @@ boolean fanCmnd::doCommand( CmndParser* pars ) {
   }
 }
 #endif //ROASTLOGGER
-

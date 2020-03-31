@@ -92,7 +92,7 @@
 ////////////////////
 // PID Control Options
 #define PID_CONTROL
-#define PID_CHAN 1 // physical channel for PID input (corresponding to thermocouple inputs T1-T4)
+#define PID_CHAN 2 // physical channel for PID input (corresponding to thermocouple inputs T1-T4)
 #define CT 1000 // default cycle time for the PID, in ms
 #define PRO 3.30 // initial proportional parameter
 #define INT 0.11 // initial integral parameter
