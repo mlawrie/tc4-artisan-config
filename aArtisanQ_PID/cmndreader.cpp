@@ -575,7 +575,7 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
     else if( pars->paramStr(1)[0] == 'P' ) { // Select profile
       #ifdef PID_CONTROL
       profile_number = atoi( pars->paramStr(1) + 1 );
-      setProfile();
+      //setProfile();
       #ifdef ACKS_ON
       Serial.print(F("# Profile number "));
       Serial.print( profile_number );

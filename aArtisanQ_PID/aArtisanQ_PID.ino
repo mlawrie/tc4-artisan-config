@@ -197,9 +197,9 @@
 #define D_MULT 0.001 // multiplier to convert temperatures from int to float
 #define DELIM "; ,=" // command line parameter delimiters
 
-#include <mcEEPROM.h>
-mcEEPROM eeprom;
-calBlock caldata;
+//#include <mcEEPROM.h>
+//mcEEPROM eeprom;
+//calBlock caldata;
 
 float AT; // ambient temp
 float T[NC];  // final output values referenced to physical channels 0-3
@@ -287,11 +287,11 @@ PWM_IO3 pwmio3;
 CmndInterp ci( DELIM ); // command interpreter object
 
 // array of thermocouple types
-tcBase * tcp[4];
+tcBase * tcp[2];
 TC_TYPE1 tc1;
 TC_TYPE2 tc2;
-TC_TYPE3 tc3;
-TC_TYPE4 tc4;
+//TC_TYPE3 tc3;
+//TC_TYPE4 tc4;
 
 // ---------------------------------- LCD interface definition
 
@@ -412,7 +412,7 @@ void logger() {
   // print ambient
   Serial.print( convertUnits( AT ), DP );
   // print active channels
-  for( uint8_t jj = 0; jj < NC; ++jj ) {
+  for( uint8_t jj = 0; jj < NC && jj < 2; ++jj ) {
     uint8_t k = actv[jj];
     if( k > 0 ) {
       --k;
@@ -527,9 +527,9 @@ void get_samples() // this function talks to the amb sensor and ADC via I2C
   uint16_t dADC = adc.getConvTime();
   dly = dly > dADC ? dly : dADC;
   
-  for( uint8_t jj = 0; jj < NC; jj++ ) { // one-shot conversions on both chips
+  for( uint8_t jj = 0; jj < NC && jj < 2; jj++ ) { // one-shot conversions on both chips
     uint8_t k = actv[jj]; // map logical channels to physical ADC channels
-    if( k > 0 ) {
+    if( k > 0) {
       --k;
       tc = tcp[k]; // each channel may have its own TC type
       adc.nextConversion( k ); // start ADC conversion on physical channel k
@@ -587,7 +587,7 @@ void updateLCD() {
     uint8_t k;
     for( jj = 0, j = 0; jj < NC && j < 2; ++jj ) {
       k = actv[jj];
-      if( k != 0 ) {
+      if( k != 0  && k < 3) {
         ++j;
         it01 = round( convertUnits( T[k-1] ) );
         if( it01 > 999 ) 
@@ -912,71 +912,71 @@ void readAnlg2() { // read analog port 2 and adjust OT2 output
 
 #ifdef PID_CONTROL
 // ---------------------------------
-void updateSetpoint() { //read profile data from EEPROM and calculate new setpoint
-  
-  if(profile_number > 0 ){
-    while( counter < times[0] || counter >= times[1] ) { // if current time outside currently loaded interval then adjust profile pointer before reading new interval data from EEPROM
-      if( counter < times[0] ) {
-        profile_ptr = profile_ptr - 2; // two bytes per int
-      }
-      else {
-        profile_ptr = profile_ptr + 2; // two bytes per int
-      }
-  
-      eeprom.read( profile_ptr, (uint8_t*)&times, sizeof(times) ); // read two profile times
-      eeprom.read( profile_ptr + 100, (uint8_t*)&temps, sizeof(temps) ); // read two profile temps.  100 = size of time data
-      
-      if( times[1] == 0 ) {
-        Setpoint = 0;
-        myPID.SetMode(MANUAL); // deactivate PID control
-        Output = 0; // set PID output to 0
-        break;
-      }
-    }
-    
-    float x = (float)( counter - times[0] ) / (float)( times[1] - times[0] ); // can probably be tidied up?? Calcs proportion of time through current profile interval
-    Setpoint = temps[0] + x * ( temps[1] - temps[0] );  // then applies the proportion to the temps
-    if( profile_CorF == 'F' && Cscale ) { // make setpoint units match current units
-      Setpoint = convertUnits( Setpoint ); // convert F to C
-    }
-    else if( profile_CorF == 'C' & !Cscale) { // make setpoint units match current units
-      Setpoint = Setpoint * 9 / 5 + 32; // convert C to F
-    }
-  }
-  else {
-    Setpoint = SV;
-  }
-}
+//void updateSetpoint() { //read profile data from EEPROM and calculate new setpoint
+//  
+//  if(profile_number > 0 ){
+//    while( counter < times[0] || counter >= times[1] ) { // if current time outside currently loaded interval then adjust profile pointer before reading new interval data from EEPROM
+//      if( counter < times[0] ) {
+//        profile_ptr = profile_ptr - 2; // two bytes per int
+//      }
+//      else {
+//        profile_ptr = profile_ptr + 2; // two bytes per int
+//      }
+//  
+//      eeprom.read( profile_ptr, (uint8_t*)&times, sizeof(times) ); // read two profile times
+//      eeprom.read( profile_ptr + 100, (uint8_t*)&temps, sizeof(temps) ); // read two profile temps.  100 = size of time data
+//      
+//      if( times[1] == 0 ) {
+//        Setpoint = 0;
+//        myPID.SetMode(MANUAL); // deactivate PID control
+//        Output = 0; // set PID output to 0
+//        break;
+//      }
+//    }
+//    
+//    float x = (float)( counter - times[0] ) / (float)( times[1] - times[0] ); // can probably be tidied up?? Calcs proportion of time through current profile interval
+//    Setpoint = temps[0] + x * ( temps[1] - temps[0] );  // then applies the proportion to the temps
+//    if( profile_CorF == 'F' && Cscale ) { // make setpoint units match current units
+//      Setpoint = convertUnits( Setpoint ); // convert F to C
+//    }
+//    else if( profile_CorF == 'C' & !Cscale) { // make setpoint units match current units
+//      Setpoint = Setpoint * 9 / 5 + 32; // convert C to F
+//    }
+//  }
+//  else {
+//    Setpoint = SV;
+//  }
+//}
 
 
-void setProfile() { // set profile pointer and read initial profile data
+//void setProfile() { // set profile pointer and read initial profile data
+//
+//  if( profile_number > 0 ) {
+//    profile_ptr = 1024 + ( 400 * ( profile_number - 1 ) ) + 4; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 4 = location of profile C or F data
+//    eeprom.read( profile_ptr, (uint8_t*)&profile_CorF, sizeof(profile_CorF) ); // read profile temp type
+//    
+//    getProfileDescription(profile_number); // read profile name and description data from eeprom for active profile number
+//    
+//    profile_ptr = 1024 + ( 400 * ( profile_number - 1 ) ) + 125; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 125 = size of profile header data
+//    eeprom.read( profile_ptr, (uint8_t*)&times, sizeof(times) ); // read 1st two profile times
+//    eeprom.read( profile_ptr + 100, (uint8_t*)&temps, sizeof(temps) ); // read 1st two profile temps.  100 = size of time data
+//    
+//    // profile_ptr is left set for profile temp/time reads
+//  }
+//  //else //do something?
+//}
 
-  if( profile_number > 0 ) {
-    profile_ptr = 1024 + ( 400 * ( profile_number - 1 ) ) + 4; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 4 = location of profile C or F data
-    eeprom.read( profile_ptr, (uint8_t*)&profile_CorF, sizeof(profile_CorF) ); // read profile temp type
-    
-    getProfileDescription(profile_number); // read profile name and description data from eeprom for active profile number
-    
-    profile_ptr = 1024 + ( 400 * ( profile_number - 1 ) ) + 125; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 125 = size of profile header data
-    eeprom.read( profile_ptr, (uint8_t*)&times, sizeof(times) ); // read 1st two profile times
-    eeprom.read( profile_ptr + 100, (uint8_t*)&temps, sizeof(temps) ); // read 1st two profile temps.  100 = size of time data
-    
-    // profile_ptr is left set for profile temp/time reads
-  }
-  //else //do something?
-}
-
-void getProfileDescription(int pn) { // read profile name and description data from eeprom
-
-  if( profile_number > 0 ) {
-    int pp = 1024 + ( 400 * ( pn - 1 ) ) + 5; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 5 = location of profile name
-    eeprom.read( pp, (uint8_t*)&profile_name, sizeof(profile_name) ); // read profile name  
-  
-    pp = 1024 + ( 400 * ( pn - 1 ) ) + 45; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 45 = location of profile description
-    eeprom.read( pp, (uint8_t*)&profile_description, sizeof(profile_description) ); // read profile name  
-  }
-   //else //do something? 
-}
+//void getProfileDescription(int pn) { // read profile name and description data from eeprom
+//
+//  if( profile_number > 0 ) {
+//    int pp = 1024 + ( 400 * ( pn - 1 ) ) + 5; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 5 = location of profile name
+//    eeprom.read( pp, (uint8_t*)&profile_name, sizeof(profile_name) ); // read profile name  
+//  
+//    pp = 1024 + ( 400 * ( pn - 1 ) ) + 45; // 1024 = start of profile storage in EEPROM. 400 = size of each profile. 45 = location of profile description
+//    eeprom.read( pp, (uint8_t*)&profile_description, sizeof(profile_description) ); // read profile name  
+//  }
+//   //else //do something? 
+//}
 #endif // end ifdef PID_CONTROL
 
 #ifdef LCDAPTER
@@ -1034,7 +1034,7 @@ void checkButtons() { // take action if a button is pressed
         else if( buttons.keyPressed( 2 ) && buttons.keyChanged( 2 ) ) { // button 3 - ENTER BUTTON
           #ifdef PID_CONTROL
           profile_number = profile_number_new; // change profile_number to new selection
-          setProfile(); // call setProfile to load the profile selected
+          //setProfile(); // call setProfile to load the profile selected
           lcd.clear();
           LCD_mode = 0; // jump back to main LCD display mode
           #endif
@@ -1043,7 +1043,7 @@ void checkButtons() { // take action if a button is pressed
           lcd.clear();
           #ifdef PID_CONTROL
           profile_number_new = profile_number; // reset profile_number_new if profile wasn't changed
-          setProfile(); // or getProfileDescription()?????????
+          //setProfile(); // or getProfileDescription()?????????
           #endif
           LCD_mode++; // change mode
           if( LCD_mode > 1 ) LCD_mode = 0; // loop at limit of modes
@@ -1164,7 +1164,7 @@ int reading;
             #ifdef PID_CONTROL
             profile_number_new--;
             if( profile_number_new == 0 ) profile_number_new = NUM_PROFILES; // loop profile_number to end
-            getProfileDescription(profile_number_new);
+            //getProfileDescription(profile_number_new);
             #endif
             break;
         }
@@ -1208,7 +1208,7 @@ int reading;
             Serial.print(profile_number_new);
             profile_number_new++;
             if( profile_number_new > NUM_PROFILES ) profile_number_new = 1; // loop profile_number to start
-            getProfileDescription(profile_number_new);
+            //getProfileDescription(profile_number_new);
             #endif
             break;
         }
@@ -1249,7 +1249,7 @@ int reading;
             lcd.clear();
             #ifdef PID_CONTROL
             profile_number_new = profile_number; // reset profile_number_new if profile wasn't changed
-            setProfile(); // or getProfileDescription()?????????
+            //setProfile(); // or getProfileDescription()?????????
             #endif
             LCD_mode++; // change mode
             if( LCD_mode > 1 ) LCD_mode = 0; // loop at limit of modes
@@ -1286,7 +1286,7 @@ int reading;
           case 1: // Profile change page
             #ifdef PID_CONTROL
               profile_number = profile_number_new; // change profile_number to new selection
-              setProfile(); // call setProfile to load the profile selected
+              //setProfile(); // call setProfile to load the profile selected
               lcd.clear();
               LCD_mode = 0; // jump back to main LCD display mode
             #endif
@@ -1349,14 +1349,14 @@ void setup()
   amb.setOffset( AMB_OFFSET );
 
   // read calibration and identification data from eeprom
-  if( readCalBlock( eeprom, caldata ) ) {
-    adc.setCal( caldata.cal_gain, caldata.cal_offset );
-    amb.setOffset( caldata.K_offset );
-  }
-  else { // if there was a problem with EEPROM read, then use default values
+//  if( readCalBlock( eeprom, caldata ) ) {
+//    adc.setCal( caldata.cal_gain, caldata.cal_offset );
+//    amb.setOffset( caldata.K_offset );
+//  }
+//  else { // if there was a problem with EEPROM read, then use default values
     adc.setCal( CAL_GAIN, UV_OFFSET );
     amb.setOffset( AMB_OFFSET );
-  }   
+  //}   
 
   // initialize filters on all channels
   fT[0].init( ET_FILTER ); // digital filtering on ET
@@ -1403,8 +1403,8 @@ void setup()
   // assign thermocouple types
   tcp[0] = &tc1;
   tcp[1] = &tc2;
-  tcp[2] = &tc3;
-  tcp[3] = &tc4;
+//  tcp[2] = &tc3;
+//  tcp[3] = &tc4;
 
 // add active commands to the linked list in the command interpreter object
   ci.addCommand( &dwriter );
@@ -1461,7 +1461,7 @@ void setup()
   profile_number = 0; // set default profile, 0 is for override by roasting software
 #endif
   profile_number_new = profile_number; 
-  setProfile(); // read profile description initial time/temp data from eeprom and set profile_pointer
+  //setProfile(); // read profile description initial time/temp data from eeprom and set profile_pointer
 #endif
 
 #ifdef RESET_TIMER_BUTTON
@@ -1525,7 +1525,7 @@ void loop()
   // Run PID if defined and active
   #ifdef PID_CONTROL
     if( myPID.GetMode() != MANUAL ) { // If PID in AUTOMATIC mode calc new output and assign to OT1
-      updateSetpoint(); // read profile data from EEPROM and calculate new setpoint
+      //updateSetpoint(); // read profile data from EEPROM and calculate new setpoint
       uint8_t k = pid_chan;  // k = physical channel
       if( k != 0 ) --k; // adjust for 0-based array index
       // Input is the SV for the PID algorithm
@@ -1579,4 +1579,3 @@ void loop()
   next_loop_time = next_loop_time + looptime; // add time until next loop
   counter = counter + ( looptime / 1000 ); if( counter > 3599 ) counter = 3599;
 }
-
