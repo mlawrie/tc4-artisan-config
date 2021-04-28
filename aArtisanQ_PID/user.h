@@ -47,10 +47,10 @@
 // Only active in standalone mode.
 //#if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
 
-//#define RESET_TIMER_BUTTON 4 // Reset timer using button on pin X
-//#define TOGGLE_PID_BUTTON 5  // Toggle PID on/off using button on pin X
-//#define MODE_BUTTON 7        // Switch LCD Mode
-//#define ENTER_BUTTON 8       // Confirm choice
+#define RESET_TIMER_BUTTON 4 // Reset timer using button on pin X
+#define TOGGLE_PID_BUTTON 5  // Toggle PID on/off using button on pin X
+#define MODE_BUTTON 7        // Switch LCD Mode
+#define ENTER_BUTTON 8       // Confirm choice
 
 //#endif
 
@@ -149,7 +149,7 @@
 // default values for systems without calibration values stored in EEPROM
 #define CAL_GAIN 1.00 // you may substitute a known gain adjustment from calibration
 #define UV_OFFSET 0 // you may substitute a known value for uV offset in ADC
-#define AMB_OFFSET 0.0 // you may substitute a known value for amb temp offset (Celsius)
+#define AMB_OFFSET -2.0 // you may substitute a known value for amb temp offset (Celsius)
 
 ////////////////////
 // Time Base for slow PWM on OT1, OT2

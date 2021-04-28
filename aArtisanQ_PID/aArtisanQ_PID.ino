@@ -253,8 +253,8 @@ uint32_t checktime;
 
   int profile_number; // number of the profile for PID control
   int profile_ptr; // EEPROM pointer for profile data
-  char profile_name[40];
-  char profile_description[80];
+  char profile_name[21];
+  char profile_description[41];
   int profile_number_new; // used when switching between profiles
   
   int times[2], temps[2]; // time and temp values read from EEPROM for setpoint calculation
@@ -388,14 +388,14 @@ void checkStatus( uint32_t ms ) { // this is an active delay loop
     #if ( !defined( PHASE_ANGLE_CONTROL ) ) || ( INT_PIN != 3 ) // disable when PAC active and pin 3 reads the ZCD
     dcfan.slew_fan(); // keep the fan smoothly increasing in speed
     #endif
-    #ifdef LCDAPTER
-      #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID )
-        checkButtons();
-      #endif
-    #endif
-    #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
+//    #ifdef LCDAPTER
+//      #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID )
+//        checkButtons();
+//      #endif
+//    #endif
+    //#if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
       checkButtonPins();
-    #endif
+    //#endif
   }
 }
 
@@ -867,6 +867,7 @@ void readAnlg1() { // read analog port 1 and adjust OT1 output
   if( reading <= 100 && reading != old_reading_anlg1 ) { // did it change?
     analogue1_changed = true;
     old_reading_anlg1 = reading; // save reading for next time
+    Setpoint = reading * (600-450) / 100 + 450;
 #ifdef PHASE_ANGLE_CONTROL
 #ifdef IO3_HTR_PAC
     levelIO3 = reading;
@@ -1134,7 +1135,7 @@ void outIO3() { // update output for IO3
 #endif
 
 // ----------------------------------
-#if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
+//#if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
 
 void checkButtonPins() {
 int reading;
@@ -1299,7 +1300,7 @@ int reading;
 #endif
 
 }
-#endif
+//#endif
 
 
 // ------------------------------------------------------------------------
@@ -1388,10 +1389,12 @@ void setup()
 
 
   #ifdef ANALOGUE1
-  old_reading_anlg1 = getAnalogValue( anlg1 ); // initialize old_reading with initial analogue value
+  readAnlg1();
+  //old_reading_anlg1 = getAnalogValue( anlg1 ); // initialize old_reading with initial analogue value
   #endif
   #ifdef ANALOGUE2
-  old_reading_anlg2 = getAnalogValue( anlg2 ); // initialize old_reading with initial analogue value
+  readAnlg2();
+  //old_reading_anlg2 = getAnalogValue( anlg2 ); // initialize old_reading with initial analogue value
   #endif  
   
   // initialize the active channels to default values
@@ -1513,7 +1516,8 @@ void loop()
   // Read analogue POT values if defined
   #ifdef ANALOGUE1
     #ifdef PID_CONTROL
-      if( myPID.GetMode() == MANUAL ) readAnlg1(); // if PID is off allow ANLG1 read
+      //if( myPID.GetMode() == MANUAL ) readAnlg1(); // if PID is off allow ANLG1 read
+      readAnlg1();
     #else
       readAnlg1(); // if PID_CONTROL is not defined always allow ANLG1 read
     #endif // PID_CONTROL
